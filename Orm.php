@@ -30,7 +30,8 @@ class Tsukiyo_Orm
     private static $fkeys;
 
     // Sql
-    private $where = array('eq' => array());
+    private $where = array();
+    private $singleWhere = array();
     private $orders = array();
 
     private $joins = array();
@@ -98,14 +99,55 @@ class Tsukiyo_Orm
                                         . ':' . count($this->config['pkeys']));
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey)
-            $this->where['eq'][$pkey] = $ids[$i];
+            $this->where['='][$pkey] = $ids[$i];
 
         return $this;
     }
     public function eq($where){
+        return $this->setWhere('=', $where);
+    }
+    public function ne($where){
+        return $this->setWhere('<>', $where);
+    }
+    public function lt($where){
+        return $this->setWhere('<', $where);
+    }
+    public function le($where){
+        return $this->setWhere('<=', $where);
+    }
+    public function gt($where){
+        return $this->setWhere('>', $where);
+    }
+    public function ge($where){
+        return $this->setWhere('>=', $where);
+    }
+    public function like($where){
+        return $this->setWhere('like', $where);
+    }
+    public function notLike($where){
+        return $this->setWhere('not like', $where);
+    }
+    public function isNull($where){
+        return $this->setSingleWhere('is null', $where);
+    }
+    public function isNotNull($where){
+        return $this->setSingleWhere('is not null', $where);
+    }
+
+    public function setWhere($op, $where){
         foreach ($where as $k => $v){
             $dbProp = Tsukiyo_Util::toDbName($k);
-            $this->where['eq'][$dbProp] = $v;
+            $this->where[$op][$dbProp] = $v;
+        }
+        return $this;
+    }
+    public function setSingleWhere($op, $where){
+        $where = (array)$where;
+        foreach ($where as $v){
+            $dbProp = Tsukiyo_Util::toDbName($v);
+            if (!isset($this->singleWhere[$op]))
+                $this->singleWhere[$op] = array();
+            $this->singleWhere[$op][] = $v;
         }
         return $this;
     }
@@ -165,7 +207,7 @@ class Tsukiyo_Orm
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey){
             $voName = Tsukiyo_Util::toVoName($pkey);
-            $this->where['eq'][$pkey] = $vo->$voName;
+            $this->where['='][$pkey] = $vo->$voName;
         }
     }
     public function update($vo){
@@ -294,9 +336,15 @@ class Tsukiyo_Orm
     private function getWhere(){
         $lines = array();
         $params = array();
-        foreach ($this->where['eq'] as $k => $v){
-            $lines[] = " $k = ? ";
-            $params[] = $v;
+        foreach ($this->where as $op => $kv){
+            foreach ($kv as $k => $v){
+                $lines[] = " $k $op ? ";
+                $params[] = $v;
+            }
+        }
+        foreach ($this->singleWhere as $op => $kv){
+            foreach ($kv as $v)
+                $lines[] = " $v $op ";
         }
         if (count($lines) === 0)
             return array('', $params);
