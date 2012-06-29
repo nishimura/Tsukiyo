@@ -6,12 +6,14 @@ class Tsukiyo_Iterator implements Iterator
     private $vo;
     private $isContinue = false;
     private $isRoot = false;
+    private $stmtIndex;
 
     private $parentVo;
     private $parentPkeys;
     private $childIterator;
 
     private $previousPkeys;
+    private $cloneVo = false;
     public function __construct($orm, $vo)
     {
         $this->orm = $orm;
@@ -19,11 +21,16 @@ class Tsukiyo_Iterator implements Iterator
     }
     public function rewind(){
         $this->key = 0;
-        $this->stmt = $this->orm->getStmt();
-        //echo 'rewind: ' . get_class($this->vo) . "<br>\n";
         if ($this->isRoot){
-            $this->isContinue = $this->stmt->fetch(PDO::FETCH_BOUND);
+            $ret = $this->orm->fetchIfNotMove($this->stmtIndex);
+            if ($ret === false){
+                $this->isContinue = false;
+            }else{
+                $this->stmtIndex = $ret;
+                $this->isContinue = true;
+            }
         }else{
+            $this->stmtIndex = $this->orm->getStmtIndex();
             $this->isContinue = true;
         }
     }
@@ -35,32 +42,31 @@ class Tsukiyo_Iterator implements Iterator
         return $currentPkeys;
     }
     public function current(){
-        return $this->vo;
+        if (!$this->cloneVo)
+            return $this->vo;
+
+        $clone = clone $this->vo;
+        foreach ($this->vo as $k => $v){
+            unset($clone->$k);
+            $clone->$k = $v;
+        }
+        return $clone;
     }
     public function key(){
         return $this->key;
     }
     public function next(){
-        //echo 'next: ' . get_class($this->vo) . "<br>\n";
-        $this->stopper++;
-        if ($this->stopper > 100){
-            // debug
-            $this->isContinue = false;
-            return;
-        }
-
         if ($this->parentVo){
             $this->previousPkeys = $this->getPkeyValues();
-            //var_dump($this->previousPkeys);
         }
-        if (!$this->stmt){
+
+        $ret = $this->orm->fetchIfNotMove($this->stmtIndex);
+        if ($ret === false){
             $this->isContinue = false;
-        }else if (!$this->childIterator){
-            // leaf
-            $this->isContinue = $this->stmt->fetch(PDO::FETCH_BOUND);
-            if (!$this->isContinue)
-                $this->orm->removeStmt();
+        }else{
+            $this->stmtIndex = $ret;
         }
+
 
         if ($this->parentVo){
             $currentPkeys = $this->getPkeyValues();
@@ -96,5 +102,13 @@ class Tsukiyo_Iterator implements Iterator
     }
     public function setRoot(){
         $this->isRoot = true;
+    }
+
+    /**
+     * Need if using parent value after execute foreach child iterator.
+     */
+    public function setCloneVo($cloneVo){
+        $this->cloneVo = $cloneVo;
+        return $this;
     }
 }

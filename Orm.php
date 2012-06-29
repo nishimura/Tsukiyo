@@ -40,6 +40,7 @@ class Tsukiyo_Orm
 
     // resource
     private $stmt;
+    private $stmtIndex;
 
     // result
     private $vo;
@@ -127,6 +128,7 @@ class Tsukiyo_Orm
             return null;
         }
 
+        $this->setupIteratorRelations($this->vo);
         return $this->vo;
     }
 
@@ -165,6 +167,23 @@ class Tsukiyo_Orm
 
     public function getStmt(){
         return $this->stmt;
+    }
+    public function getStmtIndex(){
+        return $this->stmtIndex;
+    }
+    public function fetchIfNotMove($stmtIndex){
+        if ($this->stmtIndex === false)
+            return false;
+        if (is_numeric($this->stmtIndex) && $stmtIndex !== $this->stmtIndex)
+            return $this->stmtIndex;
+
+        $ret = $this->stmt->fetch(PDO::FETCH_BOUND);
+        if ($ret === false){
+            $this->stmtIndex = false;
+            return false;
+        }
+        $this->stmtIndex++;
+        return $this->stmtIndex;
     }
     public function removeStmt(){
         $this->stmt = null;
@@ -254,7 +273,7 @@ class Tsukiyo_Orm
         }
         $hit = false;
         foreach ($parentVo as $k => $v){
-            if ($v instanceof Tsukiyo_Iterator){
+            if ($parentIterator && ($v instanceof Tsukiyo_Iterator)){
                 if ($hit)
                     throw new Tsukiyo_Exception('Unsupported multiple iterator in vo');
                 $hit = true;
