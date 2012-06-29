@@ -122,7 +122,7 @@ class Tsukiyo_Orm
         $sql = $this->getSql();
 
         $this->stmt = $this->driver->query($sql[0], $sql[1]);
-        $this->bindColumns($this->vo, $this->stmt);
+        $this->voDatum->bind($this->stmt);
         $ret = $this->stmt->fetch(PDO::FETCH_BOUND);
         if (!$ret){
             return null;
@@ -146,15 +146,11 @@ class Tsukiyo_Orm
         return $this->driver->query($sql, $params);
     }
 
-    public function bindColumns($vo, $stmt){
-        $this->voDatum->bind($stmt);
-    }
-
     /** ============ Iterator ===================*/
     public function iterator(){
         $sql = $this->getSql();
         $this->stmt = $this->query($sql[0], $sql[1]);
-        $this->bindColumns($this->vo, $this->stmt);
+        $this->voDatum->bind($this->stmt);
         $ret = new Tsukiyo_Iterator($this, $this->vo);
         $this->setupIteratorRelations($ret);
         $ret->setRoot();
@@ -165,9 +161,6 @@ class Tsukiyo_Orm
         return $this->builderCount($sql[0], $sql[1]);
     }
 
-    public function getStmt(){
-        return $this->stmt;
-    }
     public function getStmtIndex(){
         return $this->stmtIndex;
     }
@@ -185,10 +178,7 @@ class Tsukiyo_Orm
         $this->stmtIndex++;
         return $this->stmtIndex;
     }
-    public function removeStmt(){
-        $this->stmt = null;
-        return $this;
-    }
+
     /** ============ private method =============*/
     private function getSql($count = false){
         if ($count){

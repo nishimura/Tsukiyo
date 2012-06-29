@@ -72,10 +72,6 @@ class Tsukiyo_Iterator implements Iterator
             $currentPkeys = $this->getPkeyValues();
             if ($this->previousPkeys !== $currentPkeys)
                 $this->isContinue = false;
-        }else if ($this->isRoot){
-            $stmt = $this->orm->getStmt();
-            if (!$stmt)
-                $this->isContinue = false;
         }
 
         $this->key++;

@@ -76,43 +76,6 @@ abstract class Tsukiyo_Driver
     }
 
     /**
-     * Get a row by primary key.
-     *
-     * @param string $sql 
-     * @param int $key
-     * @return string[]
-     * @access public
-     */
-    public function getRowByKey($sql, $key){
-        return $this->getRow($sql, $key, true);
-    }
-
-    /**
-     * Get a row.
-     *
-     * @param string $sql
-     * @param string|array $where
-     * @return string[]
-     * @access public
-     */
-    public function getRow($sql, $where = null, $onlyone = false){
-        if ($onlyone && $where === null){
-            trigger_error('Not set second argument.', E_USER_WARNING);
-            return null;
-        }
-
-        $stmt = $this->query($sql, $where);
-        $count = $stmt->rowCount();
-
-        if ($stmt && $count){
-            if ($onlyone && $count !== 1)
-                trigger_error("Two or more data exists [$sql].", E_USER_WARNING);
-            
-            return $stmt->fetchRow();
-        }
-    }
-
-    /**
      * Query.
      *
      * @param string $sql
