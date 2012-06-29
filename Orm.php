@@ -122,9 +122,27 @@ class Tsukiyo_Orm
         return $this->setWhere('>=', $where);
     }
     public function like($where){
+        $where = $this->prepareLike($where, true, true);
         return $this->setWhere('like', $where);
     }
     public function notLike($where){
+        $where = $this->prepareLike($where, true, true);
+        return $this->setWhere('not like', $where);
+    }
+    public function starts($where){
+        $where = $this->prepareLike($where, false, true);
+        return $this->setWhere('like', $where);
+    }
+    public function notStarts($where){
+        $where = $this->prepareLike($where, false, true);
+        return $this->setWhere('not like', $where);
+    }
+    public function ends($where){
+        $where = $this->prepareLike($where, true, false);
+        return $this->setWhere('like', $where);
+    }
+    public function notEnds($where){
+        $where = $this->prepareLike($where, true, false);
         return $this->setWhere('not like', $where);
     }
     public function isNull($where){
@@ -150,6 +168,19 @@ class Tsukiyo_Orm
             $this->singleWhere[$op][] = $v;
         }
         return $this;
+    }
+    public function prepareLike($where, $left, $right){
+        foreach ($where as $k => $v){
+            $v = str_replace('\\', '\\\\', $v);
+            $v = str_replace('%', '\\%', $v);
+            $v = str_replace('_', '\\_', $v);
+            if ($left)
+                $v = '%' . $v;
+            if ($right)
+                $v = $v . '%';
+            $where[$k] = $v;
+        }
+        return $where;
     }
     public function order($order){
         $order = (array)$order;
