@@ -3,6 +3,11 @@
 class Tsukiyo_Util
 {
     public static function toDbName($voName){
+        $dot = strpos($voName, '.');
+        if ($dot !== false){
+            return self::toDbName(substr($voName, 0, $dot))
+                . '.' . self::toDbName(substr($voName, $dot + 1));
+        }
         $length = strlen($voName);
         $name = strtolower($voName[0]);
         for ($i = 1; $i < $length; $i++){
