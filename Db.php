@@ -81,8 +81,15 @@ class Tsukiyo_Db
     public function update($vo){
         return $this->create($this->voToDbName($vo))->update($vo);
     }
-    public function delete($vo){
-        return $this->create($this->voToDbName($vo))->delete($vo);
+    public function delete($vo, $ids = null){
+        if (is_string($vo) && $ids){
+            $orm = $this->create($vo);
+            $arg = $ids;
+        }else{
+            $orm = $this->create($this->voToDbName($vo));
+            $arg = $vo;
+        }
+        return $orm->delete($arg);
     }
 
     public function getDriver(){
