@@ -90,6 +90,16 @@ class Tsukiyo_Orm
         return $vo;
     }
 
+    public function id($ids){
+        if (count($ids) !== count($this->config['pkeys']))
+            throw new Tsukiyo_Exception('Unmatched id count ' . count($ids)
+                                        . ':' . count($this->config['pkeys']));
+        $pkeys = $this->config['pkeys'];
+        foreach ($pkeys as $i => $pkey)
+            $htis->where['eq'][$pkey] = $ids[$i];
+
+        return $this;
+    }
     public function eq($where){
         foreach ($where as $k => $v){
             $dbProp = Tsukiyo_Util::toDbName($k);
