@@ -69,6 +69,22 @@ class Tsukiyo_Db
                                $this->config['voPrefix']);
     }
 
+    private function voToDbName($vo){
+        return str_replace($this->config['voPrefix'], '', get_class($vo));
+    }
+    public function save($vo){
+        return $this->create($this->voToDbName($vo))->save($vo);
+    }
+    public function insert($vo){
+        return $this->create($this->voToDbName($vo))->insert($vo);
+    }
+    public function update($vo){
+        return $this->create($this->voToDbName($vo))->update($vo);
+    }
+    public function delete($vo){
+        return $this->create($this->voToDbName($vo))->delete($vo);
+    }
+
     public function getDriver(){
         try {
             $db = Tsukiyo_Driver_Factory::factory($this->config['dsn']);

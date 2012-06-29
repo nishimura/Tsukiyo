@@ -57,7 +57,7 @@ class Tsukiyo_Orm
         $this->initTableConfig($file);
 
         if (!isset(self::$tables[$this->dbName])){
-            trigger_error("Table $tabneName is not exists.", E_USER_WARNING);
+            trigger_error("Table $name is not exists.", E_USER_WARNING);
             return;
         }
         $this->config = self::$tables[$this->dbName];
@@ -90,13 +90,15 @@ class Tsukiyo_Orm
         return $vo;
     }
 
+    /** ============ Selection ===================*/
     public function id($ids){
+        $ids = (array)$ids;
         if (count($ids) !== count($this->config['pkeys']))
             throw new Tsukiyo_Exception('Unmatched id count ' . count($ids)
                                         . ':' . count($this->config['pkeys']));
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey)
-            $htis->where['eq'][$pkey] = $ids[$i];
+            $this->where['eq'][$pkey] = $ids[$i];
 
         return $this;
     }
@@ -140,6 +142,85 @@ class Tsukiyo_Orm
 
         $this->setupIteratorRelations($this->vo);
         return $this->vo;
+    }
+
+    /** ============ Update ===================*/
+    public function save($vo){
+        $pkeys = $this->config['pkeys'];
+        $count = count($pkeys);
+        $hit = 0;
+        foreach ($pkeys as $i => $pkey){
+            $voName = Tsukiyo_Util::toVoName($pkey);
+            if (isset($vo->$voName))
+                $hit++;
+        }
+        if ($hit === 0)
+            return $this->insert($vo);
+        else if ($hit === $count)
+            return $this->update($vo);
+        else
+            throw new Tsukiyo_Exception('Undetermined insert or update.');
+    }
+    private function setIdsByVo($vo){
+        $pkeys = $this->config['pkeys'];
+        foreach ($pkeys as $i => $pkey){
+            $voName = Tsukiyo_Util::toVoName($pkey);
+            $this->where['eq'][$pkey] = $vo->$voName;
+        }
+    }
+    public function update($vo){
+        $this->setIdsByVo($vo);
+        $pkeys = $this->config['pkeys'];
+
+        $cols = array();
+        $params = array();
+        foreach ($this->config['cols'] as $col => $typ){
+            if (in_array($col, $pkeys))
+                continue;
+            $voName = Tsukiyo_Util::toVoName($col);
+            $cols[] = "$col = ?";
+            $params[] = $vo->$voName;
+        }
+        $sql = "update $this->dbName set ";
+        $sql .= implode(', ', $cols);
+        $where = $this->getWhere();
+        $sql .= $where[0];
+        foreach ($where[1] as $p)
+            $params[] = $p;
+
+        return $this->driver->execute($sql, $params);
+    }
+    public function insert($vo){
+        $cols = array();
+        $vals = array();
+        $params = array();
+        foreach ($this->config['cols'] as $col => $typ){
+            $voName = Tsukiyo_Util::toVoName($col);
+            if (!isset($vo->$voName))
+                continue;
+            $cols[] = $col;
+            $vals[] = '?';
+            $params[] = $vo->$voName;
+        }
+        $sql = "insert into $this->dbName (";
+        $sql .= implode(', ', $cols);
+        $sql .= ') values (';
+        $sql .= implode(', ', $vals);
+        $sql .= ')';
+
+        return $this->driver->execute($sql, $params);
+    }
+    public function delete($voOrIds){
+        if ($voOrIds instanceof Tsukiyo_Vo){
+            $this->setIdsByVo($voOrIds);
+        }else{
+            $this->id($voOrIds);
+        }
+        $sql = "delete from $this->dbName ";
+        $where = $this->getWhere();
+        $sql .= $where[0];
+
+        return $this->driver->execute($sql, $where[1]);
     }
 
     /** ============================ */
