@@ -65,7 +65,8 @@ class Tsukiyo_Db
 
     public function create($name){
         $driver = $this->getDriver();
-        return new Tsukiyo_Orm($driver, $this->config, $name);
+        return new Tsukiyo_Orm($driver, $this->config['configFile'], $name,
+                               $this->config['voPrefix']);
     }
 
     public function getDriver(){
