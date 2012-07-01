@@ -302,7 +302,7 @@ class Tsukiyo_Orm
         return $this->driver->execute($sql, $where[1]);
     }
 
-    /** ============================ */
+    /** ============= utility methods =============== */
     public function builderCount($sql, $params){
         $stmt = $this->driver->query($sql, $params);
         $ret = $stmt->fetch(PDO::FETCH_NUM);
@@ -314,6 +314,14 @@ class Tsukiyo_Orm
     }
     public function query($sql, $params){
         return $this->driver->query($sql, $params);
+    }
+    public function releaseStmt(){
+        if (!$this->stmt)
+            return $this;
+
+        $this->stmt->closeCursor();
+        $this->stmt = null;
+        return $this;
     }
 
     /** ============ Iterator ===================*/
