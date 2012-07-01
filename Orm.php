@@ -33,6 +33,8 @@ class Tsukiyo_Orm
     private $where = array();
     private $singleWhere = array();
     private $orders = array();
+    private $limit;
+    private $offset;
 
     private $joins = array();
     private $bindNames = array();
@@ -194,6 +196,16 @@ class Tsukiyo_Orm
         }
         return $this;
     }
+    public function limit($limit){
+        if (!is_numeric($limit) && $limit !== null)
+            throw new Tsukiyo_Exception('limit is not numeric');
+        $this->limit = $limit;
+    }
+    public function offset($offset){
+        if (!is_numeric($offset) && $offset !== null)
+            throw new Tsukiyo_Exception('offset is not numeric');
+        $this->offset = $offset;
+    }
 
 
     public function join($name){
@@ -326,9 +338,6 @@ class Tsukiyo_Orm
 
     /** ============ Iterator ===================*/
     public function iterator(){
-        $sql = $this->getSql();
-        $this->stmt = $this->query($sql[0], $sql[1]);
-        $this->voDatum->bind($this->stmt);
         $ret = new Tsukiyo_Iterator($this, $this->vo);
         $this->setupIteratorRelations($ret);
         $ret->setRoot();
@@ -348,6 +357,11 @@ class Tsukiyo_Orm
         if (is_numeric($this->stmtIndex) && $stmtIndex !== $this->stmtIndex)
             return $this->stmtIndex;
 
+        if (!$this->stmt){
+            $sql = $this->getSql();
+            $this->stmt = $this->query($sql[0], $sql[1]);
+            $this->voDatum->bind($this->stmt);
+        }
         $ret = $this->stmt->fetch(PDO::FETCH_BOUND);
         if ($ret === false){
             $this->stmtIndex = false;
@@ -377,6 +391,10 @@ class Tsukiyo_Orm
         }
         $sql .= $where[0];
         $sql .= $this->getOrder();
+        if (is_numeric($this->limit))
+            $sql .= " limit $this->limit ";
+        if (is_numeric($this->offset))
+            $sql .= " offset $this->offset ";
 
         return array($sql, $where[1]);
     }

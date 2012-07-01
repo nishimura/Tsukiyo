@@ -8,7 +8,6 @@ class Tsukiyo_Iterator implements Iterator
     private $isRoot = false;
     private $stmtIndex;
     private $key;
-    private $limit;
 
     private $parentVo;
     private $parentPkeys;
@@ -77,10 +76,6 @@ class Tsukiyo_Iterator implements Iterator
         }
 
         $this->key++;
-        if (is_numeric($this->limit) && $this->key >= $this->limit){
-            $this->orm->releaseStmt();
-            $this->isContinue = false;
-        }
     }
     public function valid(){
         return $this->isContinue;
@@ -115,6 +110,11 @@ class Tsukiyo_Iterator implements Iterator
     }
 
     public function limit($limit){
-        $this->limit = $limit;
+        $this->orm->limit($limit);
+        return $this;
+    }
+    public function offset($offset){
+        $this->orm->offset($offset);
+        return $this;
     }
 }
