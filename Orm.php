@@ -197,9 +197,15 @@ class Tsukiyo_Orm
 
 
     public function join($name){
-        if (!$this->internalJoin($this->vo, $name))
+        return $this->internalJoin($name, false);
+    }
+    public function outerJoin($name){
+        return $this->internalJoin($name, true);
+    }
+    private function internalJoin($name, $outer){
+        if (!$this->parseJoin($this->vo, $name, false))
             throw new Tsukiyo_Exception("Unknown join table $name.");
-        $this->joins[] = $name;
+        $this->joins[$name] = $outer;
         return $this;
     }
 
@@ -343,7 +349,7 @@ class Tsukiyo_Orm
         return $this->stmtIndex;
     }
 
-    /** ============ private method =============*/
+    /** ============ common method =============*/
     private function getSql($count = false){
         if ($count){
             $select = 'count(*)';
@@ -353,9 +359,11 @@ class Tsukiyo_Orm
         $where = $this->getWhere();
         $sql = "select $select from $this->dbName ";
         $left = array($this->dbName);
-        foreach ($this->joins as $join){
+        foreach ($this->joins as $join => $outer){
             $joinTable = Tsukiyo_Util::toDbName($join);
             $using = $this->getJoinUsing($left, $joinTable);
+            if ($outer)
+                $sql .= ' left outer ';
             $sql .= " join $joinTable using ($using) ";
             $left[] = $joinTable;
         }
@@ -389,7 +397,7 @@ class Tsukiyo_Orm
         return ' order by ' . implode(', ', $this->orders);
     }
 
-    private function internalJoin($left, $name){
+    private function parseJoin($left, $name){
         if ($left instanceof Tsukiyo_Vo)
             $vo = $left;
         else if ($left instanceof Tsukiyo_Iterator)
@@ -417,7 +425,7 @@ class Tsukiyo_Orm
         foreach ($vo as $k => $v){
             if (!($v instanceof Tsukiyo_Vo) && !($v instanceof Tsukiyo_Iterator))
                 continue;
-            $ret = $this->internalJoin($v, $name);
+            $ret = $this->parseJoin($v, $name);
             if ($ret)
                 return true;
         }
