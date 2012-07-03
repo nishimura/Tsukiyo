@@ -67,6 +67,14 @@ class Tsukiyo_Pager
         $this->params = $names;
         return $this;
     }
+    public function setHtmlFirst($htmlFirst){
+        $this->htmlFirst = $htmlFirst;
+        return $this;
+    }
+    public function setHtmlLast($htmlLast){
+        $this->htmlLast = $htmlLast;
+        return $this;
+    }
     public function getHtml()
     {
         $last = (int)($this->count / $this->pageCount);
