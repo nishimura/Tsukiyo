@@ -318,6 +318,8 @@ class Tsukiyo_Orm
     public function builderCount($sql, $params){
         $stmt = $this->driver->query($sql, $params);
         $ret = $stmt->fetch(PDO::FETCH_NUM);
+        if ($stmt)
+            $stmt->closeCursor();
         $stmt = null;
         if (!$ret || !isset($ret[0])){
             return null;
@@ -390,7 +392,8 @@ class Tsukiyo_Orm
             $left[] = $joinTable;
         }
         $sql .= $where[0];
-        $sql .= $this->getOrder();
+        if (!$count)
+            $sql .= $this->getOrder();
         if (is_numeric($this->limit))
             $sql .= " limit $this->limit ";
         if (is_numeric($this->offset))
