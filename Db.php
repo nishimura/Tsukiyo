@@ -21,7 +21,7 @@ class Tsukiyo_Db
     protected $config = array('dsn' => '',
                               'autoConfig' => true,
                               'configFile' => 'cache/tables.ini',
-                              'voPrefix' => 'Vo_');
+                              'voPrefix' => 'Tsukiyo_Vo_');
 
     /**
      * Set dsn
@@ -29,6 +29,7 @@ class Tsukiyo_Db
     public function setDsn($dsn)
     {
         $this->config['dsn'] = $dsn;
+        return $this;
     }
     /**
      * Set auto generate config file
@@ -36,6 +37,7 @@ class Tsukiyo_Db
     public function setAutoConfig($auto)
     {
         $this->config['autoConfig'] = $auto;
+        return $this;
     }
     /**
      * Set config file path
@@ -43,9 +45,11 @@ class Tsukiyo_Db
     public function setConfigFile($path)
     {
         $this->config['configFile'] = $path;
+        return $this;
     }
     public function setVoPrefix($prefix){
         $this->config['voPrefix'] = $prefix;
+        return $this;
     }
 
     public function generateVo($name){
