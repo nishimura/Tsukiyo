@@ -104,74 +104,72 @@ class Tsukiyo_Orm
                                         . ':' . count($this->config['pkeys']));
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey)
-            $this->where->add(Tsukiyo_Helper::
-                              eq(array(Tsukiyo_Util::toVoName($pkey) =>$ids[$i])));
+            $this->where->eq(array(Tsukiyo_Util::toVoName($pkey) =>$ids[$i]));
 
         return $this;
     }
     public function eq($where){
-        $this->where->add(Tsukiyo_Helper::eq($where));
+        $this->where->eq($where);
         return $this;
     }
     public function ne($where){
-        $this->where->add(Tsukiyo_Helper::ne($where));
+        $this->where->ne($where);
         return $this;
     }
     public function lt($where){
-        $this->where->add(Tsukiyo_Helper::lt($where));
+        $this->where->lt($where);
         return $this;
     }
     public function le($where){
-        $this->where->add(Tsukiyo_Helper::le($where));
+        $this->where->le($where);
         return $this;
     }
     public function gt($where){
-        $this->where->add(Tsukiyo_Helper::gt($where));
+        $this->where->gt($where);
         return $this;
     }
     public function ge($where){
-        $this->where->add(Tsukiyo_Helper::ge($where));
+        $this->where->ge($where);
         return $this;
     }
     public function like($where){
-        $this->where->add(Tsukiyo_Helper::like($where));
+        $this->where->like($where);
         return $this;
     }
     public function notLike($where){
-        $this->where->add(Tsukiyo_Helper::notLike($where));
+        $this->where->notLike($where);
         return $this;
     }
     public function starts($where){
-        $this->where->add(Tsukiyo_Helper::starts($where));
+        $this->where->starts($where);
         return $this;
     }
     public function notStarts($where){
-        $this->where->add(Tsukiyo_Helper::notStarts($where));
+        $this->where->notStarts($where);
         return $this;
     }
     public function ends($where){
-        $this->where->add(Tsukiyo_Helper::ends($where));
+        $this->where->ends($where);
         return $this;
     }
     public function notEnds($where){
-        $this->where->add(Tsukiyo_Helper::notEnds($where));
+        $this->where->notEnds($where);
         return $this;
     }
     public function isNull($where){
-        $this->where->add(Tsukiyo_Helper::isNull($where));
+        $this->where->isNull($where);
         return $this;
     }
     public function isNotNull($where){
-        $this->where->add(Tsukiyo_Helper::isNotNull($where));
+        $this->where->isNotNull($where);
         return $this;
     }
-    public function addOr(){
-        $this->where->add(Tsukiyo_Helper::orWhere(func_get_args()));
-        return $this;
+    public function getInternalWhere(){
+        return $this->where;
     }
-
-    public function where($where){
-        $this->where = $where;
+    public function sub(Tsukiyo_WhereTree $where){
+        $this->where->add($where);
+        return $this;
     }
     public function order($order){
         $order = (array)$order;
@@ -315,7 +313,8 @@ class Tsukiyo_Orm
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey){
             $voName = Tsukiyo_Util::toVoName($pkey);
-            $this->where['='][$pkey] = $vo->$voName;
+            $this->where->eq(array(Tsukiyo_Util::toVoName($pkey)
+                                   => $vo->$voName));
         }
     }
     public function update($vo){

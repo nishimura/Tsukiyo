@@ -75,4 +75,50 @@ class Tsukiyo_WhereTree implements Tsukiyo_Where{
         }
         return $ret;
     }
+
+    public function eq($where){
+        return $this->add(Tsukiyo_Helper::where('=', $where));
+    }
+    public function ne($where){
+        return $this->add(Tsukiyo_Helper::where('<>', $where));
+    }
+    public function lt($where){
+        return $this->add(Tsukiyo_Helper::where('<', $where));
+    }
+    public function le($where){
+        return $this->add(Tsukiyo_Helper::where('<=', $where));
+    }
+    public function gt($where){
+        return $this->add(Tsukiyo_Helper::where('>', $where));
+    }
+    public function ge($where){
+        return $this->add(Tsukiyo_Helper::where('>=', $where));
+    }
+
+
+    public function like($where){
+        return $this->add(Tsukiyo_Helper::like($where, true, true));
+    }
+    public function notLike($where){
+        return $this->add(Tsukiyo_Helper::like($where, true, true, true));
+    }
+    public function starts($where){
+        return $this->add(Tsukiyo_Helper::like($where, false, true));
+    }
+    public function notStarts($where){
+        return $this->add(Tsukiyo_Helper::like($where, false, true, true));
+    }
+    public function ends($where){
+        return $this->add(Tsukiyo_Helper::like($where, true, false));
+    }
+    public function notEnds($where){
+        return $this->add(Tsukiyo_Helper::like($where, true, false, true));
+    }
+
+    public function isNull($where){
+        return $this->add(Tsukiyo_Helper::noParamWhere('is null', $where));
+    }
+    public function isNotNull($where){
+        return $this->add(Tsukiyo_Helper::noParamWhere('is not null', $where));
+    }
 }
