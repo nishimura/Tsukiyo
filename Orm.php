@@ -203,19 +203,49 @@ class Tsukiyo_Orm
     public function outerJoin($name, $where = null){
         return $this->internalJoin($name, true, $where);
     }
+
+    private function searchJoinVo($vo, $name){
+        $voName = str_replace($this->voPrefix, '', get_class($vo));
+        if ($voName === $name)
+            return $vo;
+        foreach ($vo as $k => $v){
+            $target = null;
+            if ($v instanceof Tsukiyo_Vo)
+                $target = $v;
+            else if ($v instanceof Tsukiyo_Iterator)
+                $target = $v->getVo();
+            if ($target){
+                $ret = $this->searchJoinVo($target, $name);
+                if ($ret)
+                    return $ret;
+            }
+        }
+    }
     private function internalJoin($name, $outer, $where){
-        if (!$this->parseJoin($this->vo, $name, false))
+        if (strpos($name, '.') !== false){
+            list($leftName, $rightName) = explode('.', $name);
+            $leftVo = $this->searchJoinVo($this->vo, $leftName);
+        }else{
+            $rightName = $name;
+            $leftName = null; // unknown, search all
+            $leftVo = $this->vo;
+        }
+        if (!$this->parseJoin($leftVo, $rightName, false))
             throw new Tsukiyo_Exception("Unknown join table $name.");
 
         $sql = '';
         if ($outer)
             $sql .= ' left outer ';
-        $joinTable = Tsukiyo_Util::toDbName($name);
+        $joinTable = Tsukiyo_Util::toDbName($rightName);
         $sql .= ' join ' . $joinTable;
         $sql .= ' on (';
 
-        $left = array_keys($this->joins);
-        array_unshift($left, $this->dbName);
+        if ($leftName){
+            $left = Tsukiyo_Util::toDbName($leftName);
+        }else{
+            $left = array_keys($this->joins);
+            array_unshift($left, $this->dbName);
+        }
 
         $sql .= $this->getJoinOn($left, $joinTable);
         if ($where){
