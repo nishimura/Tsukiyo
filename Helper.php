@@ -51,10 +51,16 @@ class Tsukiyo_Helper
     }
 
     public static function orWhere($where){
-        return array('or' => $where);
+        return self::block('or', $where);
     }
     public static function andWhere($where){
-        return array('and' => $where);
+        return self::block('and', $where);
+    }
+    private static function block($andOr, $where){
+        $ret = new Tsukiyo_Helper_WhereTree($andOr);
+        foreach ($where as $child)
+            $ret->add($child);
+        return $ret;
     }
     public static function eq($where){
         return self::where('=', $where);
@@ -108,18 +114,27 @@ class Tsukiyo_Helper
         return self::singleWhere('is not null', $where);
     }
     public static function where($op, $where){
-        $ret = array();
-        foreach ($where as $k => $v)
-            $ret[Tsukiyo_Util::toDbName($k)] = $v;
-        return array($op => $ret);
+        $ret = null;
+        foreach ($where as $k => $v){
+            $w = new Tsukiyo_Helper_WhereNode($op, $k, $v);
+            if ($ret)
+                $ret = $ret->add($w);
+            else
+                $ret = $w;
+        }
+        return $ret;
     }
     public static function singleWhere($op, $where){
-        $ret = array();
+        $ret = null;
         $where = (array)$where;
         foreach ($where as $k){
-            $ret[Tsukiyo_Util::toDbName($k)] = self::$single;
+            $w = new Tsukiyo_Helper_WhereNode($op, $k, null, true);
+            if ($ret)
+                $ret = $ret->add($w);
+            else
+                $ret = $w;
         }
-        return array($op => $ret);
+        return $ret;
     }
     public static function prepareLike($where, $left, $right){
         foreach ($where as $k => $v){
@@ -140,3 +155,80 @@ class Tsukiyo_Helper_Single {
     public static $instance;
 }
 Tsukiyo_Helper::$single = new Tsukiyo_Helper_Single();
+
+interface Tsukiyo_Helper_Where{
+    public function add(Tsukiyo_Helper_Where $where);
+    public function getString();
+    public function getParams();
+    public function isSingle();
+}
+class Tsukiyo_Helper_WhereNode implements Tsukiyo_Helper_Where{
+    private $op;
+    private $name;
+    private $value;
+    private $single;
+    public function __construct($op, $voName, $value, $isSingle = false){
+        $this->op = $op;
+        $this->name = Tsukiyo_Util::toDbName($voName);
+        $this->value = $value;
+        $this->single = $isSingle;
+    }
+    public function add(Tsukiyo_Helper_Where $where){
+        $ret = new Tsukiyo_Helper_WhereTree('and');
+        $ret->add($this);
+        $ret->add($where);
+        return $ret;
+    }
+    public function getString(){
+        $ret = " $this->name $this->op ";
+        if ($this->single)
+            return $ret;
+
+        return $ret . ' ? ';
+    }
+    public function isSingle(){
+        return $this->single;
+    }
+    public function getParams(){
+        return $this->value;
+    }
+}
+class Tsukiyo_Helper_WhereTree implements Tsukiyo_Helper_Where{
+    private $children = array();
+    private $andOr;
+    public function __construct($andOr){
+        $this->andOr = $andOr;
+    }
+    public function add(Tsukiyo_Helper_Where $where){
+        $this->children[] = $where;
+        return $this;
+    }
+
+    public function getString(){
+        if (count($this->children) === 0)
+            return null;
+        $strings = array();
+        foreach ($this->children as $child){
+            $strings[] = $child->getString();
+        }
+        return '(' . implode(' '.$this->andOr.' ', $strings) . ')';
+    }
+    public function isSingle(){
+        return false;
+    }
+    public function getParams(){
+        $ret = array();
+        foreach ($this->children as $child){
+            if ($child->isSingle())
+                continue;
+            $params = $child->getParams();
+            if (is_array($params)){
+                foreach($params as $param)
+                    $ret[] = $param;
+            }else{
+                $ret[] = $params;
+            }
+        }
+        return $ret;
+    }
+}

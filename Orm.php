@@ -67,6 +67,8 @@ class Tsukiyo_Orm
         $this->config = self::$tables[$this->dbName];
         $this->vo = $this->emptyVo();
         $this->setBindNames($this->vo);
+
+        $this->where = new Tsukiyo_Helper_WhereTree('and');
     }
 
     public function emptyVo($name = null){
@@ -107,62 +109,66 @@ class Tsukiyo_Orm
         return $this;
     }
     public function eq($where){
-        return $this->addAnd(Tsukiyo_Helper::eq($where));
-    }
-    public function ne($where){
-        return $this->addAnd(Tsukiyo_Helper::ne($where));
-    }
-    public function lt($where){
-        return $this->addAnd(Tsukiyo_Helper::lt($where));
-    }
-    public function le($where){
-        return $this->setWhere(Tsukiyo_Helper::le($where));
-    }
-    public function gt($where){
-        return $this->setWhere(Tsukiyo_Helper::gt($where));
-    }
-    public function ge($where){
-        return $this->setWhere(Tsukiyo_Helper::ge($where));
-    }
-    public function like($where){
-        return $this->addAnd(Tsukiyo_Helper::like($where));
-    }
-    public function notLike($where){
-        return $this->addAnd(Tsukiyo_Helper::notLike($where));
-    }
-    public function starts($where){
-        return $this->addAnd(Tsukiyo_Helper::starts($where));
-    }
-    public function notStarts($where){
-        return $this->addAnd(Tsukiyo_Helper::notStarts($where));
-    }
-    public function ends($where){
-        return $this->addAnd(Tsukiyo_Helper::ends($where));
-    }
-    public function notEnds($where){
-        return $this->addAnd(Tsukiyo_Helper::notEnds($where));
-    }
-    public function isNull($where){
-        return $this->addAnd(Tsukiyo_Helper::isNull($where));
-    }
-    public function isNotNull($where){
-        return $this->addAnd(Tsukiyo_Helper::isNotNull($where));
-    }
-
-    public function addAnd(){
-        return $this->addWhere('and', func_get_args());
-    }
-    public function addOr(){
-        return $this->addWhere('or', func_get_args());
-    }
-    public function addWhere($andOr, $where){
-        if (!isset($this->where[$andOr]))
-            $this->where[$andOr] = array();
-
-        foreach ($where as $v)
-            $this->where[$andOr][] = $v;
+        $this->where->add(Tsukiyo_Helper::eq($where));
         return $this;
     }
+    public function ne($where){
+        $this->where->add(Tsukiyo_Helper::ne($where));
+        return $this;
+    }
+    public function lt($where){
+        $this->where->add(Tsukiyo_Helper::lt($where));
+        return $this;
+    }
+    public function le($where){
+        $this->where->add(Tsukiyo_Helper::le($where));
+        return $this;
+    }
+    public function gt($where){
+        $this->where->add(Tsukiyo_Helper::gt($where));
+        return $this;
+    }
+    public function ge($where){
+        $this->where->add(Tsukiyo_Helper::ge($where));
+        return $this;
+    }
+    public function like($where){
+        $this->where->add(Tsukiyo_Helper::like($where));
+        return $this;
+    }
+    public function notLike($where){
+        $this->where->add(Tsukiyo_Helper::notLike($where));
+        return $this;
+    }
+    public function starts($where){
+        $this->where->add(Tsukiyo_Helper::starts($where));
+        return $this;
+    }
+    public function notStarts($where){
+        $this->where->add(Tsukiyo_Helper::notStarts($where));
+        return $this;
+    }
+    public function ends($where){
+        $this->where->add(Tsukiyo_Helper::ends($where));
+        return $this;
+    }
+    public function notEnds($where){
+        $this->where->add(Tsukiyo_Helper::notEnds($where));
+        return $this;
+    }
+    public function isNull($where){
+        $this->where->add(Tsukiyo_Helper::isNull($where));
+        return $this;
+    }
+    public function isNotNull($where){
+        $this->where->add(Tsukiyo_Helper::isNotNull($where));
+        return $this;
+    }
+    public function addOr(){
+        $this->where->add(Tsukiyo_Helper::orWhere(func_get_args()));
+        return $this;
+    }
+
     public function where($where){
         $this->where = $where;
     }
@@ -257,10 +263,10 @@ class Tsukiyo_Orm
         }
         $sql = "update $this->dbName set ";
         $sql .= implode(', ', $cols);
-        $where = $this->getWhere();
-        if ($where[0]){
-            $sql .= ' where ' . $where[0];
-            foreach ($where[1] as $p)
+        $where = $this->where->getString();
+        if ($where){
+            $sql .= ' where ' . $where;
+            foreach ($this->where->getParams() as $p)
                 $params[] = $p;
         }
 
@@ -300,11 +306,11 @@ class Tsukiyo_Orm
             $this->id($voOrIds);
         }
         $sql = "delete from $this->dbName ";
-        $where = $this->getWhere();
-        if ($where[0])
-            $sql .= ' where ' . $where[0];
+        $where = $this->where->getString();
+        if ($where)
+            $sql .= ' where ' . $where;
 
-        return $this->driver->execute($sql, $where[1]);
+        return $this->driver->execute($sql, $this->where->getParams());
     }
 
     /** ============= utility methods =============== */
@@ -383,9 +389,9 @@ class Tsukiyo_Orm
             $sql .= " join $joinTable using ($using) ";
             $left[] = $joinTable;
         }
-        $where = $this->getWhere();
-        if ($where[0])
-            $sql .= ' where ' . $where[0];
+        $where = $this->where->getString();
+        if ($where)
+            $sql .= ' where ' . $where;
         if (!$count)
             $sql .= $this->getOrder();
         if (is_numeric($this->limit))
@@ -393,32 +399,9 @@ class Tsukiyo_Orm
         if (is_numeric($this->offset))
             $sql .= " offset $this->offset ";
 
-        return array($sql, $where[1]);
+        return array($sql, $this->where->getParams());
     }
-    private function getWhere(){
-        $tops = array();
-        $params = array();
-        foreach ($this->where as $sub => $block){
-            $lines = array();
-            foreach ($block as $arr){
-                foreach ($arr as $op => $kv){
-                    $ops = array();
-                    foreach ($kv as $k => $v){
-                        if ($v instanceof Tsukiyo_Helper_Single){
-                            $ops[] = " $k $op ";
-                        }else{
-                            $ops[] = " $k $op ? ";
-                            $params[] = $v;
-                        }
-                    }
-                    $lines[] = '(' . implode(' and ', $ops) . ')';
-                }
-            }
-            $tops[] = '(' . implode(' ' . $sub . ' ', $lines) . ')';
-        }
-        $sql = implode(' and ', $tops);
-        return array($sql, $params);
-    }
+
     private function getOrder(){
         if (count($this->orders) === 0)
             return '';
