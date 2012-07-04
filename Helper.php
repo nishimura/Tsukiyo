@@ -108,10 +108,10 @@ class Tsukiyo_Helper
     }
 
     public static function isNull($where){
-        return self::singleWhere('is null', $where);
+        return self::noParamWhere('is null', $where);
     }
     public static function isNotNull($where){
-        return self::singleWhere('is not null', $where);
+        return self::noParamWhere('is not null', $where);
     }
     public static function where($op, $where){
         $ret = null;
@@ -124,7 +124,7 @@ class Tsukiyo_Helper
         }
         return $ret;
     }
-    public static function singleWhere($op, $where){
+    public static function noParamWhere($op, $where){
         $ret = null;
         $where = (array)$where;
         foreach ($where as $k){

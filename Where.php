@@ -4,18 +4,18 @@ interface Tsukiyo_Where {
     public function add(Tsukiyo_Where $where);
     public function getString();
     public function getParams();
-    public function isSingle();
+    public function isNoParam();
 }
 class Tsukiyo_WhereNode implements Tsukiyo_Where{
     private $op;
     private $name;
     private $value;
-    private $single;
-    public function __construct($op, $voName, $value, $isSingle = false){
+    private $noParam;
+    public function __construct($op, $voName, $value, $isNoParam = false){
         $this->op = $op;
         $this->name = Tsukiyo_Util::toDbName($voName);
         $this->value = $value;
-        $this->single = $isSingle;
+        $this->noParam = $isNoParam;
     }
     public function add(Tsukiyo_Where $where){
         $ret = new Tsukiyo_WhereTree('and');
@@ -25,13 +25,13 @@ class Tsukiyo_WhereNode implements Tsukiyo_Where{
     }
     public function getString(){
         $ret = " $this->name $this->op ";
-        if ($this->single)
+        if ($this->noParam)
             return $ret;
 
         return $ret . ' ? ';
     }
-    public function isSingle(){
-        return $this->single;
+    public function isNoParam(){
+        return $this->noParam;
     }
     public function getParams(){
         return $this->value;
@@ -57,13 +57,13 @@ class Tsukiyo_WhereTree implements Tsukiyo_Where{
         }
         return '(' . implode(' '.$this->andOr.' ', $strings) . ')';
     }
-    public function isSingle(){
+    public function isNoParam(){
         return false;
     }
     public function getParams(){
         $ret = array();
         foreach ($this->children as $child){
-            if ($child->isSingle())
+            if ($child->isNoParam())
                 continue;
             $params = $child->getParams();
             if (is_array($params)){
