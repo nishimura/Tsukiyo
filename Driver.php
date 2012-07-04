@@ -21,7 +21,7 @@ abstract class Tsukiyo_Driver
     /**
      * Return tables information.
      *
-     * @return array
+     * @return array array('table_name1', 'table_name2', ...)
      * @access public
      */
     abstract public function getMetaTables();
@@ -29,7 +29,7 @@ abstract class Tsukiyo_Driver
     /**
      * Return Columns information.
      *
-     * @return array
+     * @return array array('col1' => 'type1', 'col2' => 'type2', ...)
      * @access public
      */
     abstract public function getMetaColumns($tableName);
@@ -37,7 +37,7 @@ abstract class Tsukiyo_Driver
     /**
      * Return primary key information.
      *
-     * @return array
+     * @return array array('col1' => 'seq1', 'col2' => 'seq2', ...)
      * @access public
      */
     abstract public function getMetaPrimaryKeys($tableName);
@@ -49,6 +49,11 @@ abstract class Tsukiyo_Driver
      * @access public
      */
     abstract public function getMetaForignKeys();
+
+    /**
+     * Return the ID of the last inserted row or sequence value.
+     */
+    abstract public function lastInsertId($name = null);
 
     /**
      * Setting DSN.
@@ -194,5 +199,12 @@ abstract class Tsukiyo_Driver
      */
     public function setErrorMode($mode){
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, $mode);
+    }
+
+    /**
+     * PDO::lastInsertId
+     */
+    public function lastInsertIdRaw($name = null){
+        return $this->conn->lastInsertId($name);
     }
 }

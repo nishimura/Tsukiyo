@@ -7,20 +7,17 @@ class Tsukiyo_Parser
         $tables = $db->getMetaTables();
         $data = '';
         foreach ($tables as $table){
-            $pkeys = $db->getMetaPrimaryKeys($table);
-            $pkeys = implode(',', $pkeys);
+            $metaPkeys = $db->getMetaPrimaryKeys($table);
+            $pkeys = '';
+            foreach ($metaPkeys as $pkey => $seq){
+                $pkeys .= "$pkey:$seq,";
+            }
+            $pkeys = rtrim($pkeys, ',');
             $data .= "[$table:$pkeys]\n";
 
             $metaCols = $db->getMetaColumns($table);
-            $columns = array();
-            $types = array();
-            foreach ($metaCols as $metaCol){
-                list($c, $t) = explode(':', $metaCol);
-                $columns[] = $c;
-                $types[] = $t;
-            }
-            foreach ($columns as $i => $col){
-                $data .= "$col\t = ${types[$i]}\n";
+            foreach ($metaCols as $col => $typ){
+                $data .= "$col\t = $typ\n";
             }
             $data .= "\n";
         }

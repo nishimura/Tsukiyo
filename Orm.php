@@ -245,6 +245,7 @@ class Tsukiyo_Orm
             if (isset($vo->$voName))
                 $hit++;
         }
+
         if ($hit === 0)
             return $this->insert($vo);
         else if ($hit === $count)
@@ -299,7 +300,14 @@ class Tsukiyo_Orm
         $sql .= implode(', ', $vals);
         $sql .= ')';
 
-        return $this->driver->execute($sql, $params);
+
+        $ret = $this->driver->execute($sql, $params);
+        foreach ($this->config['seqs'] as $pkey => $seq){
+            $prop = Tsukiyo_Util::toVoName($pkey);
+            if (!isset($vo->$prop))
+                $vo->$prop = $this->driver->lastInsertId($seq);
+        }
+        return $ret;
     }
     public function delete($voOrIds){
         if ($voOrIds instanceof Tsukiyo_Vo){
@@ -542,9 +550,18 @@ class Tsukiyo_Orm
             if ($k === Tsukiyo_Parser::FKEY_SECTION)
                 continue;
 
-            list($table, $pkey) = explode(':', $k);
-            $pkeys = explode(',', $pkey);
+            list($table, $pkeydata) = explode(':', $k, 2);
+            $pkeydata = explode(',', $pkeydata);
+            $pkeys = array();
+            $seqs = array();
+            foreach ($pkeydata as $line){
+                list($pkey, $seq) = explode(':', $line);
+                $pkeys[] = $pkey;
+                if ($seq)
+                    $seqs[$pkey] = $seq;
+            }
             $tables[$table] = array('pkeys' => $pkeys,
+                                    'seqs' => $seqs,
                                     'cols' => $v);
         }
         self::$tables = $tables;

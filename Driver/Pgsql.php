@@ -31,10 +31,16 @@ WHERE relkind = 'r' AND c.relname=?
  AND a.atttypid = t.oid AND a.attrelid = c.oid ORDER BY a.attnum";
 
     const META_KEYS_SQL = "
-select a.attname
-from pg_attribute a, pg_constraint c, pg_class r
-where c.conrelid = r.oid and a.attrelid = r.oid and a.attnum = any(c.conkey)
-and r.relname = ? and c.contype = 'p'";
+SELECT column_name,column_default
+FROM information_schema.columns 
+LEFT OUTER JOIN information_schema.constraint_column_usage
+ USING (table_catalog, table_schema, table_name, column_name)
+LEFT OUTER JOIN information_schema.table_constraints
+ USING (table_name, table_schema, constraint_catalog, constraint_schema, constraint_name)
+where table_name = ?
+  and constraint_type = 'PRIMARY KEY'
+  and table_schema='public'
+order by ordinal_position";
 
     const META_FKEYS_SQL = "
 select src.table_name, src.column_name,
@@ -101,7 +107,7 @@ where src.constraint_schema = 'public'
                 break;
             }
 
-            $rows[] = $row[0] . ':' . $type;
+            $rows[$row[0]] = $type;
         }
 
         return $rows;
@@ -121,7 +127,9 @@ where src.constraint_schema = 'public'
 
         $rows = array();
         foreach ($stmt as $row){
-            $rows[] = $row[0];
+            $seq = str_replace('nextval(\'', '', $row[1]);
+            $seq = str_replace('\'::regclass)', '', $seq);
+            $rows[$row[0]] = $seq;
         }
 
         return $rows;
@@ -176,5 +184,9 @@ where src.constraint_schema = 'public'
 
         $stmt = null;
         return $ret[0];
+    }
+
+    public function lastInsertId($name = null){
+        return $this->lastInsertIdRaw($name);
     }
 }
