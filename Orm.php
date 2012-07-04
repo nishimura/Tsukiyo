@@ -11,6 +11,7 @@ require_once __DIR__ . '/Parser.php';
 require_once __DIR__ . '/Util.php';
 require_once __DIR__ . '/Exception.php';
 require_once __DIR__ . '/Helper.php';
+require_once __DIR__ . '/Where.php';
 
 /**
  * Simple O/R Mapping Library
@@ -31,8 +32,7 @@ class Tsukiyo_Orm
     private static $fkeys;
 
     // Sql
-    private $where = array();
-    private $singleWhere = array();
+    private $where;
     private $orders = array();
     private $limit;
     private $offset;
@@ -68,7 +68,7 @@ class Tsukiyo_Orm
         $this->vo = $this->emptyVo();
         $this->setBindNames($this->vo);
 
-        $this->where = new Tsukiyo_Helper_WhereTree('and');
+        $this->where = new Tsukiyo_WhereTree('and');
     }
 
     public function emptyVo($name = null){
@@ -104,7 +104,8 @@ class Tsukiyo_Orm
                                         . ':' . count($this->config['pkeys']));
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey)
-            $this->where['and']['='][$pkey] = $ids[$i];
+            $this->where->add(Tsukiyo_Helper::
+                              eq(array(Tsukiyo_Util::toVoName($pkey) =>$ids[$i])));
 
         return $this;
     }
