@@ -197,17 +197,56 @@ class Tsukiyo_Orm
     }
 
 
-    public function join($name){
-        return $this->internalJoin($name, false);
+    public function join($name, $where = null){
+        return $this->internalJoin($name, false, $where);
     }
-    public function outerJoin($name){
-        return $this->internalJoin($name, true);
+    public function outerJoin($name, $where = null){
+        return $this->internalJoin($name, true, $where);
     }
-    private function internalJoin($name, $outer){
+    private function internalJoin($name, $outer, $where){
         if (!$this->parseJoin($this->vo, $name, false))
             throw new Tsukiyo_Exception("Unknown join table $name.");
-        $this->joins[$name] = $outer;
+
+        $sql = '';
+        if ($outer)
+            $sql .= ' left outer ';
+        $joinTable = Tsukiyo_Util::toDbName($name);
+        $sql .= ' join ' . $joinTable;
+        $sql .= ' on (';
+
+        $left = array_keys($this->joins);
+        array_unshift($left, $this->dbName);
+
+        $sql .= $this->getJoinOn($left, $joinTable);
+        if ($where){
+            $sql .= ' and ' . $where->getString();
+            $params = $where->getParams();
+        }else{
+            $params = array();
+        }
+
+        $sql .= ')';
+
+        $this->joins[$joinTable] = array($sql, $params);
         return $this;
+    }
+    private function getJoinOn($left, $right){
+        if (is_array($left)){
+            foreach ($left as $l){
+                $ret = $this->getJoinOn($l, $right);
+                if ($ret)
+                    return $ret;
+            }
+            throw new Tsukiyo_Exception("Unknown join column by $left and $right.");
+        }
+        foreach (self::$fkeys as $k => $v){
+            $from = explode('.', $k);
+            $to = explode('.', $v);
+
+            if ($left === $from[0] && $right === $to[0] ||
+                $right === $from[0] && $left === $to[0])
+                return "$k = $v";
+        }
     }
 
     public function result(){
@@ -374,22 +413,21 @@ class Tsukiyo_Orm
     }
 
     /** ============ common method =============*/
-    private function getSql($count = false){
+    public function getSql($count = false){
         if ($count){
             $select = 'count(*)';
         }else{
             $select = $this->voDatum->getSelect();
         }
         $sql = "select $select from $this->dbName ";
-        $left = array($this->dbName);
-        foreach ($this->joins as $join => $outer){
-            $joinTable = Tsukiyo_Util::toDbName($join);
-            $using = $this->getJoinUsing($left, $joinTable);
-            if ($outer)
-                $sql .= ' left outer ';
-            $sql .= " join $joinTable using ($using) ";
-            $left[] = $joinTable;
+        $params = array();
+        foreach ($this->joins as $k => $v){
+            list($joinSql, $ps) = $v;
+            $sql .= $joinSql;
+            foreach ($ps as $p)
+                $params[] = $p;
         }
+
         $where = $this->where->getString();
         if ($where)
             $sql .= ' where ' . $where;
@@ -400,7 +438,9 @@ class Tsukiyo_Orm
         if (is_numeric($this->offset))
             $sql .= " offset $this->offset ";
 
-        return array($sql, $this->where->getParams());
+        foreach ($this->where->getParams() as $p)
+            $params[] = $p;
+        return array($sql, $params);
     }
 
     private function getOrder(){
@@ -467,24 +507,6 @@ class Tsukiyo_Orm
                 if ($ret)
                     return true;
             }
-        }
-    }
-    private function getJoinUsing($left, $right){
-        if (is_array($left)){
-            foreach ($left as $l){
-                $ret = $this->getJoinUsing($l, $right);
-                if ($ret)
-                    return $ret;
-            }
-            throw new Tsukiyo_Exception("Unknown join column by $left and $right.");
-        }
-        foreach (self::$fkeys as $k => $v){
-            $from = explode('.', $k);
-            $to = explode('.', $v);
-
-            if ($left === $from[0] && $right === $to[0] ||
-                $right === $from[0] && $left === $to[0])
-                return $from[1];
         }
     }
 
