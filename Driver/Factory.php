@@ -37,7 +37,7 @@ class Tsukiyo_Driver_Factory
         }
 
         if (!$driverFile)
-            throw new Exception('Database Driver not found.');
+            throw new Tsukiyo_Exception('Database Driver not found.');
 
         $driverFilePath = dirname(__FILE__) . '/' . $driverFile;
 

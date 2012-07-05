@@ -155,29 +155,23 @@ abstract class Tsukiyo_Driver
 
     /**
      * Begin transaction.
-     * 
-     * @access public
      */
     public function begin(){
-        $this->conn->beginTransaction();
+        return $this->conn->beginTransaction();
     }
 
     /**
-     * Finish transaction.
-     * 
-     * @access public
+     * Commit transaction.
      */
     public function commit(){
-        $this->conn->commit();
+        return $this->conn->commit();
     }
 
     /**
      * Abort transaction.
-     * 
-     * @access public
      */
     public function abort(){
-        $this->conn->rollBack();
+        return $this->conn->rollBack();
     }
 
     /**

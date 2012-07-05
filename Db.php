@@ -95,6 +95,15 @@ class Tsukiyo_Db
         }
         return $orm->delete($arg);
     }
+    public function begin(){
+        return $this->getDriver()->begin();
+    }
+    public function commit(){
+        return $this->getDriver()->commit();
+    }
+    public function abort(){
+        return $this->getDriver()->abort();
+    }
 
     public function getDriver(){
         try {
