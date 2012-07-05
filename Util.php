@@ -20,6 +20,7 @@ class Tsukiyo_Util
                 $name .= '_' . strtolower($voName[$i]);
             }else{
                 // unknown
+                $name .= $voName[$i];
             }
         }
         return $name;
