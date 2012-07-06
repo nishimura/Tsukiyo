@@ -353,6 +353,9 @@ class Tsukiyo_Orm
             $vals[] = '?';
             $params[] = $vo->$voName;
         }
+        if (count($cols) === 0)
+            throw new Tsukiyo_Exception('All properties are null');
+
         $sql = "insert into $this->dbName (";
         $sql .= implode(', ', $cols);
         $sql .= ') values (';
