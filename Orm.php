@@ -381,10 +381,10 @@ class Tsukiyo_Orm
         }
         return $ret;
     }
-    public function delete($voOrIds){
+    public function delete($voOrIds = null){
         if ($voOrIds instanceof Tsukiyo_Vo){
             $this->setIdsByVo($voOrIds);
-        }else{
+        }else if ($voOrIds !== null){
             $this->id($voOrIds);
         }
         $sql = "delete from $this->dbName ";
