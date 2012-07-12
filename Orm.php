@@ -301,6 +301,9 @@ class Tsukiyo_Orm
     public function save($vo){
         $pkeys = $this->config['pkeys'];
         $count = count($pkeys);
+        if ($count > 1)
+            throw new Tsukiyo_Exception('Unsupported save with multiple primary keys. Please use update or insert method.');
+
         $hit = 0;
         foreach ($pkeys as $i => $pkey){
             $voName = Tsukiyo_Util::toVoName($pkey);
@@ -308,6 +311,7 @@ class Tsukiyo_Orm
                 $hit++;
         }
 
+        // TODO: refactoring and handle multiple pkey
         if ($hit === 0)
             return $this->insert($vo);
         else if ($hit === $count)
