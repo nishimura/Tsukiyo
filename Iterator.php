@@ -46,12 +46,7 @@ class Tsukiyo_Iterator implements Iterator
         if (!$this->cloneVo)
             return $this->vo;
 
-        $clone = clone $this->vo;
-        foreach ($this->vo as $k => $v){
-            unset($clone->$k);
-            $clone->$k = $v;
-        }
-        return $clone;
+        return $this->orm->cloneVo($this->vo);
     }
     public function key(){
         return $this->key;

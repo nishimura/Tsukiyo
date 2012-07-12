@@ -49,6 +49,9 @@ class Tsukiyo_Orm
     // result
     private $vo;
 
+    // settings
+    private $toCloneVo;
+
     public function __construct($driver, $file, $name, $prefix)
     {
         $this->driver = $driver;
@@ -288,7 +291,10 @@ class Tsukiyo_Orm
         }
 
         $this->setupIteratorRelations($this->vo);
-        return $this->vo;
+        if ($this->toCloneVo)
+            return $this->cloneVo();
+        else
+            return $this->vo;
     }
 
     /** ============ Update ===================*/
@@ -408,10 +414,25 @@ class Tsukiyo_Orm
         $this->stmt = null;
         return $this;
     }
+    public function setCloneVo($flag){
+        $this->toCloneVo = $flag;
+        return $this;
+    }
+    public function cloneVo($vo = null){
+        if (!$vo)
+            $vo = $this->vo;
+        $clone = clone $vo;
+        foreach ($vo as $k => $v){
+            unset($clone->$k);
+            $clone->$k = $v;
+        }
+        return $clone;
+    }
 
     /** ============ Iterator ===================*/
     public function iterator(){
         $ret = new Tsukiyo_Iterator($this, $this->vo);
+        $ret->setCloneVo($this->toCloneVo);
         $this->setupIteratorRelations($ret);
         $ret->setRoot();
         return $ret;
@@ -502,6 +523,7 @@ class Tsukiyo_Orm
             }else if ($right === $fromTable && $left === $toTable){
                 $newVo = $this->emptyVo($name);
                 $vo->$name = new Tsukiyo_Iterator($this, $newVo);
+                $vo->$name->setCloneVo($this->toCloneVo);
                 $this->setBindNames($newVo);
                 return true;
             }
