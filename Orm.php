@@ -249,7 +249,11 @@ class Tsukiyo_Orm
         }
 
         $sql .= $this->getJoinOn($left, $joinTable);
-        if ($where){
+        if (is_array($where)){
+            $and = Tsukiyo_Helper::$and;
+            $where = $and()->eq($where);
+        }
+        if ($where instanceof Tsukiyo_Where){
             $sql .= ' and ' . $where->getString();
             $params = $where->getParams();
         }else{
