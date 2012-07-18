@@ -107,7 +107,7 @@ class Tsukiyo_Orm
                                         . ':' . count($this->config['pkeys']));
         $pkeys = $this->config['pkeys'];
         foreach ($pkeys as $i => $pkey)
-            $this->where->eq(array(Tsukiyo_Util::toVoName($pkey) =>$ids[$i]));
+            $this->where->eq(array($this->voName . '.' . Tsukiyo_Util::toVoName($pkey) =>$ids[$i]));
 
         return $this;
     }
