@@ -89,12 +89,12 @@ where src.constraint_schema = 'public'
         foreach ($stmt as $row){
             switch($row[1]){
             case 'float8':
+            case 'numeric':
                 $type = PDO::PARAM_STR; // Not exists PARAM_FLOAT by current version.
                 break;
 
             case 'int4':
             case 'int8':
-            case 'numeric':
                 $type = PDO::PARAM_INT;
                 break;
 
