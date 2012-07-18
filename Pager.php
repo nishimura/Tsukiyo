@@ -1,5 +1,21 @@
 <?php
+/**
+ * Simple Pager
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 
+/**
+ * Simple Pager
+ *
+ * Make pager link.
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 class Tsukiyo_Pager
 {
     // internal parameters

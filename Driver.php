@@ -4,6 +4,7 @@
  *
  * PHP versions 5
  *
+ * @package Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  * @copyright 2012 Satoshi Nishimura
  */
@@ -11,6 +12,7 @@
 /**
  * Database Driver Class
  *
+ * @package Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  */
 abstract class Tsukiyo_Driver

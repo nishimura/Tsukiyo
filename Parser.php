@@ -1,5 +1,19 @@
 <?php
+/**
+ * Database setting file parser
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 
+/**
+ * Database setting file parser
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 class Tsukiyo_Parser
 {
     const FKEY_SECTION = '__forignKeys__';

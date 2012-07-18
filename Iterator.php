@@ -1,5 +1,19 @@
 <?php
+/**
+ * Iterator for view.
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 
+/**
+ * Iterator for view.
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 class Tsukiyo_Iterator implements Iterator
 {
     private $orm;

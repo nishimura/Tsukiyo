@@ -1,16 +1,43 @@
 <?php
+/**
+ * Conditions Helper
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
+
+
 
 require_once __DIR__ . '/Util.php';
 require_once __DIR__ . '/Where.php';
 
-
+/**
+ * short cut function of sql 'AND'
+ *
+ * @package Tsukiyo
+ */
 function _Tsukiyo_Helper_and(){
     return new Tsukiyo_WhereTree('and');
 }
+/**
+ * short cut function of sql 'OR'
+ *
+ * @package Tsukiyo
+ */
 function _Tsukiyo_Helper_or(){
     return new Tsukiyo_WhereTree('or');
 }
 
+/**
+ * Conditions Helper
+ *
+ * Make sub expression of sql
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 class Tsukiyo_Helper
 {
     const _AND = '_Tsukiyo_Helper_and';

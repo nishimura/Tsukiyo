@@ -1,5 +1,19 @@
 <?php
+/**
+ * Utility to convert name
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 
+/**
+ * Utility to convert name
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 class Tsukiyo_Util
 {
     public static function toDbName($voName){

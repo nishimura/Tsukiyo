@@ -4,6 +4,7 @@
  *
  * PHP versions 5
  *
+ * @package Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  * @copyright 2012 Satoshi Nishimura
  */
@@ -14,6 +15,7 @@ require_once(dirname(__FILE__) . '/Driver/Factory.php');
 /**
  * Main Class of Tsukiyo Framework
  *
+ * @package Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  */
 class Tsukiyo_Db

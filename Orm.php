@@ -99,7 +99,7 @@ class Tsukiyo_Orm
         return $vo;
     }
 
-    /** ============ Selection ===================*/
+    /* ============ Selection ===================*/
     public function id($ids){
         $ids = (array)$ids;
         if (count($ids) !== count($this->config['pkeys']))
@@ -301,7 +301,7 @@ class Tsukiyo_Orm
             return $this->vo;
     }
 
-    /** ============ Update ===================*/
+    /* ============ Update ===================*/
     public function save($vo){
         $pkeys = $this->config['pkeys'];
         $count = count($pkeys);
@@ -399,7 +399,7 @@ class Tsukiyo_Orm
         return $this->driver->execute($sql, $this->where->getParams());
     }
 
-    /** ============= utility methods =============== */
+    /* ============= utility methods =============== */
     public function builderCount($sql, $params){
         $stmt = $this->driver->query($sql, $params);
         $ret = $stmt->fetch(PDO::FETCH_NUM);
@@ -437,7 +437,7 @@ class Tsukiyo_Orm
         return $clone;
     }
 
-    /** ============ Iterator ===================*/
+    /* ============ Iterator ===================*/
     public function iterator(){
         $ret = new Tsukiyo_Iterator($this, $this->vo);
         $ret->setCloneVo($this->toCloneVo);
@@ -473,7 +473,7 @@ class Tsukiyo_Orm
         return $this->stmtIndex;
     }
 
-    /** ============ common method =============*/
+    /* ============ common method =============*/
     public function getSql($count = false){
         if ($count){
             $select = 'count(*)';

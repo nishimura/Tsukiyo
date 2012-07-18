@@ -1,11 +1,30 @@
 <?php
+/**
+ * Sql Conditions generator.
+ *
+ * @package   Tsukiyo
+ * @author    Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 
+/**
+ * Sql Conditions generator interface.
+ *
+ * @package Tsukiyo
+ * @author  Satoshi Nishimura <nishim314@gmail.com>
+ * @copyright Copyright (c) 2012 Satoshi Nishimura
+ */
 interface Tsukiyo_Where {
     public function add(Tsukiyo_Where $where);
     public function getString();
     public function getParams();
     public function isNoParam();
 }
+
+/**
+ * Single Condition
+ * @package Tsukiyo
+ */
 class Tsukiyo_WhereNode implements Tsukiyo_Where{
     private $op;
     private $name;
@@ -37,6 +56,11 @@ class Tsukiyo_WhereNode implements Tsukiyo_Where{
         return $this->value;
     }
 }
+
+/**
+ * Conditions Tree
+ * @package Tsukiyo
+ */
 class Tsukiyo_WhereTree implements Tsukiyo_Where{
     private $children = array();
     private $andOr;

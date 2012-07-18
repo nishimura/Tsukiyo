@@ -4,6 +4,7 @@
  *
  * PHP versions 5
  *
+ * @package   Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  * @copyright 2005-2011 Satoshi Nishimura
  */
@@ -13,6 +14,7 @@ require_once dirname(dirname(__FILE__)) . '/Driver.php';
 /**
  * PostgreSQL Driver Class.
  *
+ * @package   Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
  */
 class Tsukiyo_Driver_Pgsql extends Tsukiyo_Driver
