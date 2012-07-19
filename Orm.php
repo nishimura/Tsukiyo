@@ -432,6 +432,8 @@ class Tsukiyo_Orm
         $clone = clone $vo;
         foreach ($vo as $k => $v){
             unset($clone->$k);
+            if ($v instanceof Tsukiyo_Vo)
+                $v = $this->cloneVo($v);
             $clone->$k = $v;
         }
         return $clone;
