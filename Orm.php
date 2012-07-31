@@ -81,20 +81,23 @@ class Tsukiyo_Orm
         $className = $this->voPrefix . $name;
 
         if (!class_exists($className, false)){
+            $dbName = Tsukiyo_Util::toDbName($name);
+            if (!isset(self::$tables[$dbName])){
+                trigger_error("Table $tabneName is not exists.", E_USER_WARNING);
+                return;
+            }
+
+            $code = "class $className implements Tsukiyo_Vo{\n";
+            foreach (self::$tables[$dbName]['cols'] as $col => $typ){
+                $propName = Tsukiyo_Util::toVoName($col);
+                $code .= "  public \$$propName = null;\n";
+            }
+            $code .= "}\n";
+
             require_once dirname(__FILE__) . '/Vo.php';
-            eval("class $className implements Tsukiyo_Vo{}");
+            eval($code);
         }
         $vo = new $className();
-
-        $dbName = Tsukiyo_Util::toDbName($name);
-        if (!isset(self::$tables[$dbName])){
-            trigger_error("Table $tabneName is not exists.", E_USER_WARNING);
-            return;
-        }
-        foreach (self::$tables[$dbName]['cols'] as $col => $typ){
-            $propName = Tsukiyo_Util::toVoName($col);
-            $vo->$propName = null;
-        }
 
         return $vo;
     }
