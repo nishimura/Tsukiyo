@@ -25,7 +25,7 @@ class Insert
             }
         }
     }
-    function insertSubItem($parentId){
+    function insertSubItem($parentId, $parentName){
         for ($i = 1; $i <= 3; $i++){
             $subitem = new Vo_SubItem();
             $subitem->itemId = $parentId;
@@ -35,7 +35,11 @@ class Insert
             try {
                 $this->db->save($subitem);
                 echo "inserted sub item $i<br>\n";
-                $this->insertSubSubItem($subitem->subItemId);
+                if (!isset($_GET['skip']) ||
+                    ($parentName === 'foo1' && $i % 3 == 1) ||
+                    ($parentName === 'foo2' && $i % 3 == 0) ||
+                    ($parentName === 'foo3' && $i % 3 == 2))
+                    $this->insertSubSubItem($subitem->subItemId);
             }catch (Tsukiyo_Exception $e){
                 echo $e->getMessage();
             }
@@ -48,7 +52,8 @@ class Insert
             try {
                 $this->db->save($item);
                 echo "inserted item $i<br>\n";
-                $this->insertSubItem($item->itemId);
+                if (!isset($_GET['skip2']) || $i != 2)
+                    $this->insertSubItem($item->itemId, $item->name);
             }catch (Tsukiyo_Exception $e){
                 echo $e->getMessage();
             }

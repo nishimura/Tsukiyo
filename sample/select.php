@@ -15,23 +15,23 @@ class Select
     }
     public function all(){
         $items = $this->db->from('Item')
-            ->join('SubItem')
-            ->join('SubSubItem')
-            ->order('Item.itemId', 'SubItem.subItemId', 'val')
+            ->outerJoin('SubItem')
+            ->outerJoin('SubSubItem')
+            ->order(array('Item.itemId', 'SubItem.subItemId', 'val'))
             ->iterator();
         foreach ($items as $item){
             echo "$item->createdAt $item->itemId $item->name\n";
             foreach ($item->SubItem as $sub){
                 echo "\t$sub->subItemId $sub->name $sub->opt\n";
                 foreach ($sub->SubSubItem as $subsub)
-                    echo "\t\t$subsub->subSubItemId $subsub->val\n";
+                    echo "\t\tS$subsub->subSubItemId $subsub->val\n";
             }
         }
     }
     public function sub(){
         $subs = $this->db->from('SubItem')
             ->join('Item')
-            ->join('SubSubItem')
+            ->outerJoin('SubSubItem')
             ->order(array('SubItem.subItemId', 'val'))
             ->iterator();
         foreach ($subs as $sub){

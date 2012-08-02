@@ -47,6 +47,7 @@ class Tsukiyo_Iterator implements Iterator
         }else{
             $this->stmtIndex = $this->orm->getStmtIndex();
             $this->isContinue = true;
+            $this->previousPkeys = $this->getPkeyValues();
         }
     }
     private function getPkeyValues(){
@@ -73,22 +74,30 @@ class Tsukiyo_Iterator implements Iterator
             $this->stmtIndex = $ret;
         }
 
-
         if ($this->parentVo){
-            if (!$this->previousPkeys){
+            $currentPkeys = $this->getPkeyValues();
+            if ($this->previousPkeys !== $currentPkeys){
+                $this->isContinue = false;
                 $this->previousPkeys = $this->getPkeyValues();
-            }else{
-                $currentPkeys = $this->getPkeyValues();
-                if ($this->previousPkeys !== $currentPkeys){
-                    $this->isContinue = false;
-                    $this->previousPkeys = $this->getPkeyValues();
-                }
             }
         }
 
         $this->key++;
     }
     public function valid(){
+        $hit = false;
+        foreach ($this->vo as $v){
+            if ($v instanceof Tsukiyo_Vo || $v instanceof Tsukiyo_Iterator)
+                continue;
+            if ($v !== null){
+                $hit = true;
+                break;
+            }
+        }
+        if (!$hit){
+            return false; // all null when outer join
+        }
+
         return $this->isContinue;
     }
     public function setChild($name, $child){
