@@ -10,6 +10,7 @@
  */
 
 require_once(dirname(__FILE__) . '/Orm.php');
+require_once(dirname(__FILE__) . '/Vo.php');
 require_once(dirname(__FILE__) . '/Driver/Factory.php');
 
 /**
@@ -91,9 +92,11 @@ class Tsukiyo_Db
         if (is_string($vo) && $ids){
             $orm = $this->create($vo);
             $arg = $ids;
-        }else{
+        }else if ($vo instanceof Tsukiyo_Vo){
             $orm = $this->create($this->voToDbName($vo));
             $arg = $vo;
+        }else{
+            throw new Tsukiyo_Exception('Unknown type of argument1');
         }
         return $orm->delete($arg);
     }

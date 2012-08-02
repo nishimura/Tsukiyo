@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2012 Satoshi Nishimura
  */
 
+require_once __DIR__ . '/Iterator.php';
 require_once __DIR__ . '/Parser.php';
 require_once __DIR__ . '/Util.php';
 require_once __DIR__ . '/Exception.php';
@@ -193,11 +194,13 @@ class Tsukiyo_Orm
         if (!is_numeric($limit) && $limit !== null)
             throw new Tsukiyo_Exception('limit is not numeric');
         $this->limit = $limit;
+        return $this;
     }
     public function offset($offset){
         if (!is_numeric($offset) && $offset !== null)
             throw new Tsukiyo_Exception('offset is not numeric');
         $this->offset = $offset;
+        return $this;
     }
 
 

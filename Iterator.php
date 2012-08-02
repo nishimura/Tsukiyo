@@ -66,10 +66,6 @@ class Tsukiyo_Iterator implements Iterator
         return $this->key;
     }
     public function next(){
-        if ($this->parentVo){
-            $this->previousPkeys = $this->getPkeyValues();
-        }
-
         $ret = $this->orm->fetchIfNotMove($this->stmtIndex);
         if ($ret === false){
             $this->isContinue = false;
@@ -79,9 +75,15 @@ class Tsukiyo_Iterator implements Iterator
 
 
         if ($this->parentVo){
-            $currentPkeys = $this->getPkeyValues();
-            if ($this->previousPkeys !== $currentPkeys)
-                $this->isContinue = false;
+            if (!$this->previousPkeys){
+                $this->previousPkeys = $this->getPkeyValues();
+            }else{
+                $currentPkeys = $this->getPkeyValues();
+                if ($this->previousPkeys !== $currentPkeys){
+                    $this->isContinue = false;
+                    $this->previousPkeys = $this->getPkeyValues();
+                }
+            }
         }
 
         $this->key++;
