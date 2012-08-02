@@ -359,6 +359,10 @@ class Tsukiyo_Orm
         return $this->driver->execute($sql, $params);
     }
     public function insert($vo){
+        if (property_exists($vo, 'createdAt') &&
+            $vo->createdAt === null)
+            $vo->createdAt = date('Y-m-d H:i:s');
+
         $cols = array();
         $vals = array();
         $params = array();
