@@ -34,11 +34,11 @@ Initialization::
 Selection::
 
   $item = $db->from('Item')
-      ->eq('name' => 'Name 1')
+      ->eq(array('name' => 'Name 1'))
       ->result();
   $itemAndSubItems = $db->from('Item')
       ->join('SubItem')
-      ->eq('Item.name' => 'Name 1')
+      ->eq(array('Item.name' => 'Name 1'))
       ->result();
   $items = $db->from('Item')
       ->like('Item.name', 'a')
