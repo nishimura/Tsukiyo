@@ -53,7 +53,7 @@ class Tsukiyo_Orm
     // settings
     private $toCloneVo;
 
-    public function __construct($driver, $file, $name, $prefix)
+    public function __construct($driver, $file, $name, $prefix, $createConfig)
     {
         $this->driver = $driver;
         $this->voName = $name;
@@ -62,7 +62,7 @@ class Tsukiyo_Orm
 
         $this->voDatum = new Tsukiyo_Orm_VoDatum();
 
-        $this->initTableConfig($file);
+        $this->initTableConfig($file, $createConfig);
 
         if (!isset(self::$tables[$this->dbName])){
             trigger_error("Table $name is not exists.", E_USER_WARNING);
@@ -609,11 +609,12 @@ class Tsukiyo_Orm
         return $ret;
     }
 
-    private function initTableConfig($configFile){
+    private function initTableConfig($configFile, $create){
         if (self::$tables)
             return;
 
-        Tsukiyo_Parser::generate($this->driver, $configFile);
+        if ($create)
+            Tsukiyo_Parser::generate($this->driver, $configFile);
 
         $data = parse_ini_file($configFile, true);
         $tables = array();

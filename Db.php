@@ -73,7 +73,8 @@ class Tsukiyo_Db
     public function create($name){
         $driver = $this->getDriver();
         return new Tsukiyo_Orm($driver, $this->config['configFile'], $name,
-                               $this->config['voPrefix']);
+                               $this->config['voPrefix'],
+                               $this->config['autoConfig']);
     }
 
     private function voToDbName($vo){
