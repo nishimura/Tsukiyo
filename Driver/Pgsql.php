@@ -189,6 +189,6 @@ where src.constraint_schema = 'public'
     }
 
     public function lastInsertId($name = null){
-        return $this->lastInsertIdRaw($name);
+        return +$this->lastInsertIdRaw($name);
     }
 }
