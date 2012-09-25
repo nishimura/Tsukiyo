@@ -47,7 +47,8 @@ class Tsukiyo_Iterator implements Iterator
         }else{
             $this->stmtIndex = $this->orm->getStmtIndex();
             $this->isContinue = true;
-            $this->previousPkeys = $this->getPkeyValues();
+            if ($this->parentVo)
+                $this->previousPkeys = $this->getPkeyValues();
         }
     }
     private function getPkeyValues(){
