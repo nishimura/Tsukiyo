@@ -613,7 +613,7 @@ class Tsukiyo_Orm
         if (self::$tables)
             return;
 
-        if ($create)
+        if ($create || !file_exists($configFile))
             Tsukiyo_Parser::generate($this->driver, $configFile);
 
         $data = parse_ini_file($configFile, true);
