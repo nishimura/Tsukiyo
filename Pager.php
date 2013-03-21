@@ -4,7 +4,7 @@
  *
  * @package   Tsukiyo
  * @author    Satoshi Nishimura <nishim314@gmail.com>
- * @copyright Copyright (c) 2012 Satoshi Nishimura
+ * @copyright Copyright (c) 2012-2013 Satoshi Nishimura
  */
 
 /**
@@ -14,7 +14,7 @@
  *
  * @package Tsukiyo
  * @author  Satoshi Nishimura <nishim314@gmail.com>
- * @copyright Copyright (c) 2012 Satoshi Nishimura
+ * @copyright Copyright (c) 2012-2013 Satoshi Nishimura
  */
 class Tsukiyo_Pager
 {
@@ -32,6 +32,14 @@ class Tsukiyo_Pager
     // decoration parameters
     private $htmlFirst = '&lt;&lt;';
     private $htmlLast = '&gt;&gt;';
+    private $decoratePrefix = ' ';
+    private $decorateSuffix = ' ';
+    private $decorateCurrentPrefix = ' ';
+    private $decorateCurrentSuffix = ' ';
+    private $decorateDisabledPrefix = ' ';
+    private $decorateDisabledSuffix = ' ';
+
+    private $renderEndsForce = false;
     //private $htmlPrev = '&lt;';
     //private $htmlNext = '&gt;';
 
@@ -91,6 +99,36 @@ class Tsukiyo_Pager
         $this->htmlLast = $htmlLast;
         return $this;
     }
+    public function setDecoratePrefix($prefix){
+        $this->decoratePrefix = $prefix;
+        $this->decorateCurrentPrefix = $prefix;
+        return $this;
+    }
+    public function setDecorateSuffix($suffix){
+        $this->decorateSuffix = $suffix;
+        $this->decorateCurrentSuffix = $suffix;
+        return $this;
+    }
+    public function setDecorateCurrentPrefix($prefix){
+        $this->decorateCurrentPrefix = $prefix;
+        return $this;
+    }
+    public function setDecorateCurrentSuffix($suffix){
+        $this->decorateCurrentSuffix = $suffix;
+        return $this;
+    }
+    public function setRenderEndsForce($render){
+        $this->renderEndsForce = $render;
+        return $this;
+    }
+    public function setDecorateDisabledPrefix($prefix){
+        $this->decorateDisabledPrefix = $prefix;
+        return $this;
+    }
+    public function setDecorateDisabledSuffix($suffix){
+        $this->decorateDisabledSuffix = $suffix;
+        return $this;
+    }
     public function getHtml()
     {
         $last = (int)($this->count / $this->pageCount);
@@ -123,17 +161,38 @@ class Tsukiyo_Pager
         $self .= $this->counterName . '=';
 
         $ret = '';
-        if (!$isFirst)
-            $ret .= "<a href=\"${self}0\">$this->htmlFirst</a> ";
+        if (!$isFirst || $this->renderEndsForce){
+            if ($isFirst){
+                $ret .= $this->decorateDisabledPrefix;
+                $ret .= "<a>$this->htmlFirst</a>";
+                $ret .= $this->decorateDisabledSuffix;
+            }else{
+                $ret .= $this->decoratePrefix;
+                $ret .= "<a href=\"${self}0\">$this->htmlFirst</a>";
+                $ret .= $this->decorateSuffix;
+            }
+        }
         foreach ($is as $i){
             $viewCount = $i + 1;
             if ($i === $this->page)
-                $ret .= " $viewCount ";
+                $ret .= $this->decorateCurrentPrefix . "<a>$viewCount</a>"
+                    . $this->decorateCurrentSuffix;
             else
-                $ret .= " <a href=\"$self$i\">$viewCount</a> ";
+                $ret .= $this->decoratePrefix
+                    . "<a href=\"$self$i\">$viewCount</a>"
+                    . $this->decorateSuffix;
         }
-        if (!$isLast)
-            $ret .= "<a href=\"$self$last\">$this->htmlLast</a> ";
+        if (!$isLast || $this->renderEndsForce){
+            if ($isLast){
+                $ret .= $this->decorateDisabledPrefix;
+                $ret .= "<a>$this->htmlLast</a>";
+                $ret .= $this->decorateDisabledSuffix;
+            }else{
+                $ret .= $this->decoratePrefix;
+                $ret .= "<a href=\"$self$last\">$this->htmlLast</a>";
+                $ret .= $this->decorateSuffix;
+            }
+        }
         return $ret;
     }
 }
