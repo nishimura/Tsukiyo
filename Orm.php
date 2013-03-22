@@ -280,14 +280,16 @@ class Tsukiyo_Orm
             }
             throw new Tsukiyo_Exception("Unknown join column by $left and $right.");
         }
+        $ret = array();
         foreach (self::$fkeys as $k => $v){
             $from = explode('.', $k);
             $to = explode('.', $v);
 
             if ($left === $from[0] && $right === $to[0] ||
                 $right === $from[0] && $left === $to[0])
-                return "$k = $v";
+                $ret[] = "$k = $v";
         }
+        return implode(' and ', $ret);
     }
 
     public function result(){
