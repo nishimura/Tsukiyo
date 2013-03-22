@@ -52,6 +52,7 @@ join information_schema.referential_constraints using(constraint_name, constrain
 join information_schema.key_column_usage as dist
   on unique_constraint_name = dist.constraint_name
   and src.constraint_schema = dist.constraint_schema
+  and src.ordinal_position = dist.ordinal_position
 where src.constraint_schema = 'public'
 ";
 
