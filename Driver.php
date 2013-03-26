@@ -203,4 +203,12 @@ abstract class Tsukiyo_Driver
     public function lastInsertIdRaw($name = null){
         return $this->conn->lastInsertId($name);
     }
+
+    /**
+     * @param String $sql
+     * @return PDOStatement
+     */
+    public function prepareRaw($sql){
+        return $this->conn->prepare($sql);
+    }
 }

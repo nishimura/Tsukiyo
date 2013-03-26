@@ -345,23 +345,36 @@ class Tsukiyo_Orm
 
         $cols = array();
         $params = array();
+        $types = array();
         foreach ($this->config['cols'] as $col => $typ){
             if (in_array($col, $pkeys))
                 continue;
             $voName = Tsukiyo_Util::toVoName($col);
             $cols[] = "$col = ?";
             $params[] = $vo->$voName;
+            $types[] = $typ;
         }
         $sql = "update $this->dbName set ";
         $sql .= implode(', ', $cols);
         $where = $this->where->getString();
+        $whereParams = array();
         if ($where){
             $sql .= ' where ' . $where;
             foreach ($this->where->getParams() as $p)
-                $params[] = $p;
+                $whereParams[] = $p;
         }
 
-        return $this->driver->execute($sql, $params);
+        $stmt = $this->driver->prepareRaw($sql);
+        $index = 1;
+        foreach ($types as $i => $typ){
+            $stmt->bindValue($index, $params[$i], $typ);
+            $index++;
+        }
+        foreach ($whereParams as $p){
+            $stmt->bindValue($index, $p);
+            $index++;
+        }
+        return $stmt->execute();
     }
     public function insert($vo){
         if (property_exists($vo, 'createdAt') &&
@@ -371,6 +384,7 @@ class Tsukiyo_Orm
         $cols = array();
         $vals = array();
         $params = array();
+        $types = array();
         foreach ($this->config['cols'] as $col => $typ){
             $voName = Tsukiyo_Util::toVoName($col);
             if (!isset($vo->$voName))
@@ -378,6 +392,7 @@ class Tsukiyo_Orm
             $cols[] = $col;
             $vals[] = '?';
             $params[] = $vo->$voName;
+            $types[] = $typ;
         }
         if (count($cols) === 0)
             throw new Tsukiyo_Exception('All properties are null');
@@ -388,8 +403,12 @@ class Tsukiyo_Orm
         $sql .= implode(', ', $vals);
         $sql .= ')';
 
+        $stmt = $this->driver->prepareRaw($sql);
+        foreach ($types as $index => $typ){
+            $stmt->bindValue($index + 1, $params[$index], $typ);
+        }
 
-        $ret = $this->driver->execute($sql, $params);
+        $ret = $stmt->execute();
         foreach ($this->config['seqs'] as $pkey => $seq){
             $prop = Tsukiyo_Util::toVoName($pkey);
             if (!isset($vo->$prop))
